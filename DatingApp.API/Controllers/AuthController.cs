@@ -28,16 +28,26 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]UserForRegisterDto userForRegisterDto)
+        //public async Task<IActionResult> Register([FromBody]UserForRegisterDto userForRegisterDto)
+        public async Task<IActionResult> Register(UserForRegisterDto userForRegisterDto)
         {
             // Not required when have [apiController] attribute if(!ModelState.IsValid) return BadRequest(ModelState);
             // validate request
             userForRegisterDto.Username = userForRegisterDto.Username.ToLower();
 
+/*
+            // we do not have to check the model state if we have the whole class with the [APIController attribute]
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            */
+
             if (await _repo.UserExists(userForRegisterDto.Username))
             {
                 return BadRequest("Username already exists");
             }
+            
 
             var userToCreate = new User()
             {
@@ -47,7 +57,7 @@ namespace DatingApp.API.Controllers
             var createdUser = await _repo.Register(userToCreate, userForRegisterDto.Password);
 
             //return CreatedAtRoute(); //TODO return the user
-            return StatusCode(201);
+            return StatusCode(201);// later replace as CreatedATRoute
         }
 
         [HttpPost("login")]
@@ -57,18 +67,19 @@ namespace DatingApp.API.Controllers
 
             if (userFromRepo == null) return Unauthorized();
 
-// two claims
+            // two claims user id and user name
             var claims = new[]{
-                new Claim(ClaimTypes.NameIdentifier, userFromRepo.Id.ToString()),
-                new Claim(ClaimTypes.Name, userFromRepo.Username)
+                new Claim(ClaimTypes.NameIdentifier, userFromRepo.Id.ToString()), // user id
+                new Claim(ClaimTypes.Name, userFromRepo.Username)  // username
             };
 
-//create key
+            //create key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
-//secure signing credentials
+            //secure signing credentials
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            var tokenDescriptor = new SecurityTokenDescriptor(){
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = creds
@@ -77,8 +88,9 @@ namespace DatingApp.API.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-// return token to client
-            return Ok(new {
+            // return token to client
+            return Ok(new
+            {
                 token = tokenHandler.WriteToken(token)
             });
         }
