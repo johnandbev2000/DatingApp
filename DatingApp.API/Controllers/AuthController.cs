@@ -35,19 +35,19 @@ namespace DatingApp.API.Controllers
             // validate request
             userForRegisterDto.Username = userForRegisterDto.Username.ToLower();
 
-/*
-            // we do not have to check the model state if we have the whole class with the [APIController attribute]
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            */
+            /*
+                        // we do not have to check the model state if we have the whole class with the [APIController attribute]
+                        if (!ModelState.IsValid)
+                        {
+                            return BadRequest(ModelState);
+                        }
+                        */
 
             if (await _repo.UserExists(userForRegisterDto.Username))
             {
                 return BadRequest("Username already exists");
             }
-            
+
 
             var userToCreate = new User()
             {
@@ -93,6 +93,7 @@ namespace DatingApp.API.Controllers
             {
                 token = tokenHandler.WriteToken(token)
             });
+
         }
 
     }
