@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from './_services/auth.service';
+import { JwtHelperService} from '@auth0/angular-jwt';
 
 @Component({
   selector: 'app-root',
@@ -6,9 +8,17 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  jwtHelper = new JwtHelperService();
 
-  constructor() { }
+  constructor(private authService: AuthService) { }
+
   ngOnInit(): void {
+    const token = localStorage.getItem('token');
+    if(token)
+    {
+      // make token available if already exists e..g refresh / user is still logged in... then nav.component can display
+      this.authService.decodedToken = this.jwtHelper.decodeToken(token);
+    }
   }
 
 

@@ -74,6 +74,8 @@ namespace DatingApp.API
                         var error = context.Features.Get<IExceptionHandlerFeature>();
                         if (error != null)
                         {
+                             context.Response.AddApplicationError(error.Error.Message);
+                            await context.Response.WriteAsync(error.Error.Message);
                             // the purpose of below line - note using own extension in Helpers.Extensions class
                             // purpose to add CORS headers to stop warning in client
                             //BUT my experience was that there was no warning in client and headers were alreadypresent (perhaps coure is on the v2 where i am on v3)
