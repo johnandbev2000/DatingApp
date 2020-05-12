@@ -38,6 +38,9 @@ namespace DatingApp.API
             services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddCors();
+
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
+            
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
 
             services.AddControllers().AddNewtonsoftJson(opt =>
