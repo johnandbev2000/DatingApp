@@ -52,15 +52,17 @@ namespace DatingApp.API.Controllers
             }
 
 
-            var userToCreate = new User()
-            {
-                Username = userForRegisterDto.Username
-            };
+            var userToCreate = _mapper.Map<User>(userForRegisterDto);
 
+
+            userToCreate.Introduction = "";// TODO gone wrong / not null in DB  but not in dto... 
             var createdUser = await _repo.Register(userToCreate, userForRegisterDto.Password);
 
-            //return CreatedAtRoute(); //TODO return the user
-            return StatusCode(201);// later replace as CreatedATRoute
+            var userToReturn = _mapper.Map<User>(userForRegisterDto);
+
+            return CreatedAtRoute("GetUser", new {controller = "Users", id = createdUser.Id}, userToReturn ); 
+            
+            //return StatusCode(201);// later replace as CreatedATRoute
         }
 
         [HttpPost("login")]
